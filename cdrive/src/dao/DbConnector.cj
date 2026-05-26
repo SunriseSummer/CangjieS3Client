@@ -1,0 +1,93 @@
+package cdrive.dao
+
+import std.database.sql.*
+import std.collection.*
+import cangjie_tpc::opengauss.driver.*
+
+public class DbConnector {
+    private let url: String
+
+    public init(url: String) {
+        this.url = url
+    }
+
+    public func getConnection(): Connection {
+        let driver = DriverManager.getDriver("opengauss").getOrThrow()
+        return driver.open(url, []).connect()
+    }
+
+    public func queryToJson(
+        sqlStr: String,
+        params: Array<Any>,
+        columns: Array<String>
+    ): String {
+        let conn = getConnection()
+        try {
+            let stmt = conn.prepareStatement(sqlStr)
+            try {
+                for (i in 0..params.size) {
+                    stmt.set(i, params[i])
+                }
+                let rs = stmt.query()
+                let sb = StringBuilder()
+                sb.append("[")
+                var first = true
+                while (rs.next()) {
+                    if (!first) { sb.append(",") }
+                    first = false
+                    sb.append("{")
+                    for (j in 0..columns.size) {
+                        if (j > 0) { sb.append(",") }
+                        sb.append("\"${escapeJson(columns[j])}\":")
+                        sb.append("\"${escapeJson(rs.getOrNull<String>(j) ?? "")}\"")
+                    }
+                    sb.append("}")
+                }
+                sb.append("]")
+                return sb.toString()
+            } finally {
+                stmt.close()
+            }
+        } finally {
+            conn.close()
+        }
+    }
+
+    public func queryFirstValue(sqlStr: String, params: Array<Any>): String {
+        let conn = getConnection()
+        try {
+            let stmt = conn.prepareStatement(sqlStr)
+            try {
+                for (i in 0..params.size) {
+                    stmt.set(i, params[i])
+                }
+                let rs = stmt.query()
+                if (rs.next()) {
+                    return rs.getOrNull<String>(0) ?? ""
+                }
+                return ""
+            } finally {
+                stmt.close()
+            }
+        } finally {
+            conn.close()
+        }
+    }
+
+    public func execute(sqlStr: String, params: Array<Any>): Int64 {
+        let conn = getConnection()
+        try {
+            let stmt = conn.prepareStatement(sqlStr)
+            try {
+                for (i in 0..params.size) {
+                    stmt.set(i, params[i])
+                }
+                return stmt.update().rowCount
+            } finally {
+                stmt.close()
+            }
+        } finally {
+            conn.close()
+        }
+    }
+}
