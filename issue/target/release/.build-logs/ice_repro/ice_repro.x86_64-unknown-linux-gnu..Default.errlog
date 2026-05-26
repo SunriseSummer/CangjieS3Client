@@ -1,5 +1,0 @@
-Cangjie Compiler: 1.1.0 (cjnative)
-Target: x86_64-unknown-linux-gnu
-[31mInternal Compiler Error: [0mBroken llvm ir!
-Please report this to Cangjie team and include the project. Error Code: 13
-Error: failed to compile package `ice_repro`, return code is 2

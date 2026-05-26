@@ -1,2 +1,0 @@
-Incorrect number of arguments passed to called function!
-  %0 = call i8 addrspace(1)* @_CN9ice_repro8Registry6createIG_HRNat6StringENNY_5LevelE(%"record.std.core:String"* @"$const_cjstring.2FEkxMpvVQh", i32 1, %TypeInfo* @"ice_repro:Registry.ti", %TypeInfo* @"ice_repro:Registry.ti"), !dbg !23
