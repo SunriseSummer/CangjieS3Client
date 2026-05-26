@@ -66,8 +66,12 @@
 
 ```bash
 # 设置 Cangjie 1.1.0 环境
-source <cangjie-sdk-path>/envsetup.sh
-export CANGJIE_STDX_PATH=<stdx-path>/linux_x86_64_cjnative/dynamic/stdx
+# 将下面的路径替换为实际的 SDK 和 STDX 解压路径
+source /path/to/cangjie/envsetup.sh
+export CANGJIE_STDX_PATH=/path/to/stdx/linux_x86_64_cjnative/dynamic/stdx
+
+# 运行时还需要将 STDX 路径加入动态库搜索路径
+export LD_LIBRARY_PATH=$CANGJIE_STDX_PATH:$LD_LIBRARY_PATH
 
 # 构建 s3client
 cd s3client && cjpm build
