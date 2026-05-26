@@ -1,0 +1,100 @@
+/*
+ * Copyright 2024 Primeton Information Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package s3client.action
+
+/*
+ *
+ * @author: wangwb
+ * @date: 2023-12-15
+ */
+public class SelectObjectContent <: AbstractS3Action<SelectObjectContentRequest, SelectObjectContentResponse> {
+    public init(s3ClientConfigMap: ConfigMap, s3Req: SelectObjectContentRequest) {
+        super(s3ClientConfigMap, s3Req)
+    }
+
+    public prop name: String {
+        get() {
+            return "SelectObjectContent"
+        }
+    }
+
+    protected func marshalling(s3Req: SelectObjectContentRequest): S3HttpRequestBuilder {
+        let httpReq = createHttpRequest("POST", bucket: s3Req.bucket, key: s3Req.key, action: "select-type=2")
+        httpReq.addHeader(S3Constants.SSE_CUSTOMER_ALGORITHM, s3Req.sseCustomerAlgorithm)
+        httpReq.addHeader(S3Constants.SSE_CUSTOMER_KEY, s3Req.sseCustomerKey)
+        httpReq.addHeader(S3Constants.SSE_CUSTOMER_KEY_MD5, s3Req.sseCustomerKeyMD5)
+        httpReq.addHeader(S3Constants.EXPECTED_BUCKET_OWNER, s3Req.expectedBucketOwner)
+        let reqXml = s3Req.selectRequest.toXml()
+        httpReq.setBody(S3Content.fromString(reqXml, MimeType.MIME_TYPE_XML))
+        return httpReq
+    }
+
+    protected func unmarshalling(httpRsp: S3HttpResponse): SelectObjectContentResponse {
+        return SelectObjectContentResponse(S3ResponseMetadata(httpRsp.headers))
+    }
+}
+
+// -----
+//
+// -----
+
+public class SelectObjectContentRequest <: AbstractS3Request {
+    public let bucket: String
+    public let key: String
+    public let sseCustomerAlgorithm: ?String
+    public let sseCustomerKey: ?String
+    public let sseCustomerKeyMD5: ?String
+    public let selectRequest: SelectContentRequest
+    public let expectedBucketOwner: ?String
+
+    public init(
+        requestConfig!: ?S3RequestConfig = None,
+        bucket!: String,
+        key!: String,
+        sseCustomerAlgorithm!: ?String = None,
+        sseCustomerKey!: ?String = None,
+        sseCustomerKeyMD5!: ?String = None,
+        selectRequest!: SelectContentRequest,
+        expectedBucketOwner!: ?String = None
+    ) {
+        super(requestConfig)
+        this.bucket = bucket
+        this.key = key
+        this.sseCustomerAlgorithm = sseCustomerAlgorithm
+        this.sseCustomerKey = sseCustomerKey
+        this.sseCustomerKeyMD5 = sseCustomerKeyMD5
+        this.selectRequest = selectRequest
+        this.expectedBucketOwner = expectedBucketOwner
+    }
+
+    public func toString(): String {
+        return "SelectObjectContentRequest(" +
+            "bucket=${bucket}, key=${key}, sseCustomerAlgorithm=${sseCustomerAlgorithm}, sseCustomerKey=${sseCustomerKey}, " +
+            "sseCustomerKeyMD5=${sseCustomerKeyMD5}, selectRequest=${selectRequest}, expectedBucketOwner=${expectedBucketOwner}" +
+            ")"
+    }
+}
+
+public class SelectObjectContentResponse <: AbstractS3Response {
+    public init(responseMetadata: S3ResponseMetadata) {
+        super(responseMetadata)
+    }
+
+    public func toString(): String {
+        return "SelectObjectContentResponse()"
+    }
+}

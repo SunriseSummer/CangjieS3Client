@@ -1,0 +1,245 @@
+/*
+ * Copyright 2024 Primeton Information Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package s3client.action
+
+/*
+ *
+ * @author: wangwb
+ * @date: 2023-12-15
+ */
+public class WriteGetObjectResponse <: AbstractS3Action<WriteGetObjectResponseRequest, WriteGetObjectResponseResponse> {
+    public init(s3ClientConfigMap: ConfigMap, s3Req: WriteGetObjectResponseRequest) {
+        super(s3ClientConfigMap, s3Req)
+    }
+
+    public prop name: String {
+        get() {
+            return "WriteGetObjectResponse"
+        }
+    }
+
+    protected func marshalling(s3Req: WriteGetObjectResponseRequest): S3HttpRequestBuilder {
+        let httpReq = createHttpRequest("POST", path: "/WriteGetObjectResponse")
+        httpReq.addHeader(S3Constants.REQUEST_ROUTE, s3Req.requestRoute)
+        httpReq.addHeader(S3Constants.REQUEST_TOKEN, s3Req.requestToken)
+        httpReq.addHeader("x-amz-fwd-" + "status", s3Req.statusCode?.toString())
+        httpReq.addHeader("x-amz-fwd-" + "error-code", s3Req.errorCode)
+        httpReq.addHeader("x-amz-fwd-" + "error-message", s3Req.errorMessage)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.ACCEPT_RANGES, s3Req.acceptRanges)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.CACHE_CONTROL, s3Req.cacheControl)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.CONTENT_DISPOSITION, s3Req.contentDisposition)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.CONTENT_ENCODING, s3Req.contentEncoding)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.CONTENT_LANGUAGE, s3Req.contentLanguage)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.CONTENT_LENGTH, s3Req.contentLength?.toString())
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.CONTENT_RANGE, s3Req.contentRange)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.CONTENT_TYPE, s3Req.contentType)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.CHECKSUM_CRC32, s3Req.checksumCRC32)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.CHECKSUM_CRC32C, s3Req.checksumCRC32C)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.CHECKSUM_SHA1, s3Req.checksumSHA1)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.CHECKSUM_SHA256, s3Req.checksumSHA256)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.DELETE_MARKER, s3Req.deleteMarker?.toString())
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.ETAG, s3Req.etag)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.EXPIRES, s3Req.expires?.toStringRfc822())
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.EXPIRATION, s3Req.expiration)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.LAST_MODIFIED, s3Req.lastModified?.toStringRfc822())
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.MISSING_META, s3Req.missingMeta?.toString())
+        match (s3Req.metadata) {
+            case None => ()
+            case Some(map) => for ((k, v) in map) {
+                //TODO 奇怪, 好像这个不用"x-amz-fwd-header-"
+                httpReq.addHeader(S3Constants.META_ + k, v)
+            }
+        }
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.OBJECT_LOCK_MODE, s3Req.objectLockMode)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.OBJECT_LOCK_LEGAL_HOLD_STATUS, s3Req.objectLockLegalHoldStatus
+        )
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.OBJECT_LOCK_RETAIN_UNTIL_DATE,
+            s3Req.objectLockRetainUntilDate?.toStringRfc822())
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.PARTS_COUNT, s3Req.partsCount?.toString())
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.REPLICATION_STATUS, s3Req.replicationStatus)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.REQUEST_CHARGED, s3Req.requestCharged)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.RESTORE, s3Req.restore)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.SERVER_SIDE_ENCRYPTION, s3Req.serverSideEncryption)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.SSE_CUSTOMER_ALGORITHM, s3Req.sseCustomerAlgorithm)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.SSEKMS_KEY_ID, s3Req.ssekmsKeyId)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.SSE_CUSTOMER_KEY_MD5, s3Req.sseCustomerKeyMD5)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.STORAGE_CLASS, s3Req.storageClass)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.TAG_COUNT, s3Req.tagCount?.toString())
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.VERSION_ID, s3Req.versionId)
+        httpReq.addHeader("x-amz-fwd-header-" + S3Constants.BUCKET_KEY_ENABLED, s3Req.bucketKeyEnabled?.toString())
+        return httpReq
+    }
+
+    protected func unmarshalling(httpRsp: S3HttpResponse): WriteGetObjectResponseResponse {
+        return WriteGetObjectResponseResponse(S3ResponseMetadata(httpRsp.headers))
+    }
+}
+
+// -----
+//
+// -----
+
+public class WriteGetObjectResponseRequest <: AbstractS3Request {
+    public let requestRoute: String
+    public let requestToken: String
+    public let statusCode: ?Int32
+    public let errorCode: ?String
+    public let errorMessage: ?String
+    public let acceptRanges: ?String
+    public let cacheControl: ?String
+    public let contentDisposition: ?String
+    public let contentEncoding: ?String
+    public let contentLanguage: ?String
+    public let contentLength: ?Int64
+    public let contentRange: ?String
+    public let contentType: ?String
+    public let checksumCRC32: ?String
+    public let checksumCRC32C: ?String
+    public let checksumSHA1: ?String
+    public let checksumSHA256: ?String
+    public let deleteMarker: ?Bool
+    public let etag: ?String
+    public let expires: ?DateTime
+    public let expiration: ?String
+    public let lastModified: ?DateTime
+    public let missingMeta: ?Int32
+    public let metadata: ?Map<String, String>
+    public let objectLockMode: ?String
+    public let objectLockLegalHoldStatus: ?String
+    public let objectLockRetainUntilDate: ?DateTime
+    public let partsCount: ?Int32
+    public let replicationStatus: ?String
+    public let requestCharged: ?String
+    public let restore: ?String
+    public let serverSideEncryption: ?String
+    public let sseCustomerAlgorithm: ?String
+    public let ssekmsKeyId: ?String
+    public let sseCustomerKeyMD5: ?String
+    public let storageClass: ?String
+    public let tagCount: ?Int32
+    public let versionId: ?String
+    public let bucketKeyEnabled: ?Bool
+
+    public init(
+        requestConfig!: ?S3RequestConfig = None,
+        requestRoute!: String,
+        requestToken!: String,
+        statusCode!: ?Int32 = None,
+        errorCode!: ?String = None,
+        errorMessage!: ?String = None,
+        acceptRanges!: ?String = None,
+        cacheControl!: ?String = None,
+        contentDisposition!: ?String = None,
+        contentEncoding!: ?String = None,
+        contentLanguage!: ?String = None,
+        contentLength!: ?Int64 = None,
+        contentRange!: ?String = None,
+        contentType!: ?String = None,
+        checksumCRC32!: ?String = None,
+        checksumCRC32C!: ?String = None,
+        checksumSHA1!: ?String = None,
+        checksumSHA256!: ?String = None,
+        deleteMarker!: ?Bool = None,
+        etag!: ?String = None,
+        expires!: ?DateTime = None,
+        expiration!: ?String = None,
+        lastModified!: ?DateTime = None,
+        missingMeta!: ?Int32 = None,
+        metadata!: ?Map<String, String> = None,
+        objectLockMode!: ?String = None,
+        objectLockLegalHoldStatus!: ?String = None,
+        objectLockRetainUntilDate!: ?DateTime = None,
+        partsCount!: ?Int32 = None,
+        replicationStatus!: ?String = None,
+        requestCharged!: ?String = None,
+        restore!: ?String = None,
+        serverSideEncryption!: ?String = None,
+        sseCustomerAlgorithm!: ?String = None,
+        ssekmsKeyId!: ?String = None,
+        sseCustomerKeyMD5!: ?String = None,
+        storageClass!: ?String = None,
+        tagCount!: ?Int32 = None,
+        versionId!: ?String = None,
+        bucketKeyEnabled!: ?Bool = None
+    ) {
+        super(requestConfig)
+        this.requestRoute = requestRoute
+        this.requestToken = requestToken
+        this.statusCode = statusCode
+        this.errorCode = errorCode
+        this.errorMessage = errorMessage
+        this.acceptRanges = acceptRanges
+        this.cacheControl = cacheControl
+        this.contentDisposition = contentDisposition
+        this.contentEncoding = contentEncoding
+        this.contentLanguage = contentLanguage
+        this.contentLength = contentLength
+        this.contentRange = contentRange
+        this.contentType = contentType
+        this.checksumCRC32 = checksumCRC32
+        this.checksumCRC32C = checksumCRC32C
+        this.checksumSHA1 = checksumSHA1
+        this.checksumSHA256 = checksumSHA256
+        this.deleteMarker = deleteMarker
+        this.etag = etag
+        this.expires = expires
+        this.expiration = expiration
+        this.lastModified = lastModified
+        this.missingMeta = missingMeta
+        this.metadata = metadata
+        this.objectLockMode = objectLockMode
+        this.objectLockLegalHoldStatus = objectLockLegalHoldStatus
+        this.objectLockRetainUntilDate = objectLockRetainUntilDate
+        this.partsCount = partsCount
+        this.replicationStatus = replicationStatus
+        this.requestCharged = requestCharged
+        this.restore = restore
+        this.serverSideEncryption = serverSideEncryption
+        this.sseCustomerAlgorithm = sseCustomerAlgorithm
+        this.ssekmsKeyId = ssekmsKeyId
+        this.sseCustomerKeyMD5 = sseCustomerKeyMD5
+        this.storageClass = storageClass
+        this.tagCount = tagCount
+        this.versionId = versionId
+        this.bucketKeyEnabled = bucketKeyEnabled
+    }
+
+    public func toString(): String {
+        return "WriteGetObjectResponseRequest(" +
+            "requestRoute=${requestRoute}, requestToken=${requestToken}, statusCode=${statusCode}, errorCode=${errorCode}, " +
+            "errorMessage=${errorMessage}, acceptRanges=${acceptRanges}, cacheControl=${cacheControl}, contentDisposition=${contentDisposition}, " +
+            "contentEncoding=${contentEncoding}, contentLanguage=${contentLanguage}, contentLength=${contentLength}, contentRange=${contentRange}, " +
+            "contentType=${contentType}, checksumCRC32=${checksumCRC32}, checksumCRC32C=${checksumCRC32C}, checksumSHA1=${checksumSHA1}, " +
+            "checksumSHA256=${checksumSHA256}, deleteMarker=${deleteMarker}, etag=${etag}, expires=${expires}, " +
+            "expiration=${expiration}, lastModified=${lastModified}, missingMeta=${missingMeta}, metadata=${StringUtils.mapToString(metadata)}, " +
+            "objectLockMode=${objectLockMode}, objectLockLegalHoldStatus=${objectLockLegalHoldStatus}, objectLockRetainUntilDate=${objectLockRetainUntilDate}, partsCount=${partsCount}, " +
+            "replicationStatus=${replicationStatus}, requestCharged=${requestCharged}, restore=${restore}, serverSideEncryption=${serverSideEncryption}, " +
+            "sseCustomerAlgorithm=${sseCustomerAlgorithm}, ssekmsKeyId=${ssekmsKeyId}, sseCustomerKeyMD5=${sseCustomerKeyMD5}, storageClass=${storageClass}, " +
+            "tagCount=${tagCount}, versionId=${versionId}, bucketKeyEnabled=${bucketKeyEnabled}" + //
+        ")"
+    }
+}
+
+public class WriteGetObjectResponseResponse <: AbstractS3Response {
+    public init(responseMetadata: S3ResponseMetadata) {
+        super(responseMetadata)
+    }
+
+    public func toString(): String {
+        return "WriteGetObjectResponseResponse()"
+    }
+}

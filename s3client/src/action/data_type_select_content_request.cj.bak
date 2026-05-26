@@ -1,0 +1,144 @@
+/*
+ * Copyright 2024 Primeton Information Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package s3client.action
+
+/*
+ *
+ * @author: wangwb
+ * @date: 2023-12-15
+ */
+public class SelectContentRequest <: ToString {
+    public let expression: String
+    public let expressionType: String
+    public let requestProgress: ?RequestProgress
+    public let inputSerialization: InputSerialization
+    public let outputSerialization: OutputSerialization
+    public let scanRange: ?ScanRange
+
+    public init(
+        expression!: String,
+        expressionType!: String,
+        requestProgress!: ?RequestProgress = None,
+        inputSerialization!: InputSerialization,
+        outputSerialization!: OutputSerialization,
+        scanRange!: ?ScanRange = None
+    ) {
+        this.expression = expression
+        this.expressionType = expressionType
+        this.requestProgress = requestProgress
+        this.inputSerialization = inputSerialization
+        this.outputSerialization = outputSerialization
+        this.scanRange = scanRange
+    }
+
+    public func toString(): String {
+        return "SelectContentRequest(" +
+            "expression=${expression}, expressionType=${expressionType}, requestProgress=${requestProgress}, inputSerialization=${inputSerialization}, " +
+            "outputSerialization=${outputSerialization}, scanRange=${scanRange}" + ")"
+    }
+}
+
+public class RequestProgress <: ToString {
+    public let enabled: ?Bool
+
+    public init(enabled!: ?Bool = None) {
+        this.enabled = enabled
+    }
+
+    public func toString(): String {
+        return "RequestProgress(enabled=${enabled})"
+    }
+}
+
+public class ScanRange <: ToString {
+    public let start: ?Int64
+    public let end: ?Int64
+
+    public init(
+        start!: ?Int64 = None,
+        end!: ?Int64 = None
+    ) {
+        this.start = start
+        this.end = end
+    }
+
+    public func toString(): String {
+        return "ScanRange(start=${start}, end=${start})"
+    }
+}
+
+// -----
+//
+// -----
+
+extend SelectContentRequest <: S3XmlObject<SelectContentRequest> {
+    public static prop ELE_NAME: String {
+        get() {
+            "SelectObjectContentRequest"
+        }
+    }
+
+    public func toXml(eleName: String, isRoot: Bool): String {
+        let expression = this.expression.toXml("Expression")
+        let expressionType = this.expressionType.toXml("ExpressionType")
+        let requestProgress = this.requestProgress?.toXml() ?? ""
+        let inputSerialization = this.inputSerialization.toXml()
+        let outputSerialization = this.outputSerialization.toXml()
+        let scanRange = this.scanRange?.toXml() ?? ""
+        return "<${eleName} ${namespace(isRoot)}>${expression}${expressionType}${requestProgress}" +
+            "${inputSerialization}${outputSerialization}${scanRange}</${eleName}>"
+    }
+
+    public static func fromXml(_: S3XmlElement): SelectContentRequest {
+        throw UnsupportedException()
+    }
+}
+
+extend RequestProgress <: S3XmlObject<RequestProgress> {
+    public static prop ELE_NAME: String {
+        get() {
+            "RequestProgress"
+        }
+    }
+
+    public func toXml(eleName: String, _: Bool): String {
+        let enabled = this.enabled?.toString().toXml("Enabled") ?? ""
+        return "<${eleName}>${enabled}</${eleName}>"
+    }
+
+    public static func fromXml(_: S3XmlElement): RequestProgress {
+        throw UnsupportedException()
+    }
+}
+
+extend ScanRange <: S3XmlObject<ScanRange> {
+    public static prop ELE_NAME: String {
+        get() {
+            "ScanRange"
+        }
+    }
+
+    public func toXml(eleName: String, _: Bool): String {
+        let start = this.start?.toString().toXml("Start") ?? ""
+        let end = this.end?.toString().toXml("End") ?? ""
+        return "<${eleName}>${start}${end}</${eleName}>"
+    }
+
+    public static func fromXml(_: S3XmlElement): ScanRange {
+        throw UnsupportedException()
+    }
+}

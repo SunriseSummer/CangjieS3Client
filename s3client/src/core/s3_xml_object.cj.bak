@@ -1,0 +1,160 @@
+/*
+ * Copyright 2024 Primeton Information Technologies, Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package s3client.core
+
+/*
+ *
+ * @author: wangwb
+ * @date: 2023-12-07
+ */
+public let NS_AWS_S3 = "http://s3.amazonaws.com/doc/2006-03-01/"
+
+public interface S3XmlObject<T> {
+    static prop ELE_NAME: String
+    func toXml(eleName: String, isRoot: Bool): String
+    static func fromXml(ele: S3XmlElement): T
+    // -----
+    func toXml(): String {
+        return toXml(ELE_NAME, true)
+    }
+
+    func toXml(eleName: String): String {
+        return toXml(eleName, true)
+    }
+
+    func namespace(isRoot: Bool): String {
+        if (!isRoot) {
+            return ""
+        }
+        return "xmlns=\"${NS_AWS_S3}\""
+    }
+}
+
+public class S3XmlElement <: ToString {
+    private let delegate: XmlElement
+    // private let childMap: S3MultiValueMap<String, S3XmlElement>
+
+    public static func fromXml(xml: String): S3XmlElement {
+        return S3XmlElement(XmlParser().parse(xml).getOrThrow())
+    }
+
+    // private static func wrap(delegate: XmlElement): S3XmlElement {
+    //     let result = S3XmlElement(delegate)
+    //     // result.popluate()
+    //     return result
+    // }
+
+    private init(delegate: XmlElement) {
+        this.delegate = delegate
+        // this.childMap = S3MultiValueMap.create()
+    }
+
+    // private func popluate(): Unit {
+    //     for (child in delegate.childrenElements) {
+    //         childMap.add(child.name, wrap(child))
+    //     }
+    // }
+
+    public func toString(): String {
+        return delegate.toString()
+    }
+
+    public prop content: String {
+        get() {
+            delegate.content
+        }
+    }
+
+    public func child(name: String): ?S3XmlElement {
+        for (child in delegate.childrenElements) {
+            if (child.name == name) {
+                return S3XmlElement(child)
+            }
+        }
+        return None
+    }
+
+    public func child<T>(name: String, action: (S3XmlElement) -> T): ?T {
+        let ele = child(name)
+        if (ele.isNone()) {
+            return None
+        }
+        return action(ele.getOrThrow())
+    }
+
+    public func childRequired(name: String): S3XmlElement {
+        return child(name).getOrThrow() {=> NoneValueException("Missing element with name: ${name}")}
+    }
+
+    public func childRequired<T>(name: String, action: (S3XmlElement) -> T): T {
+        return action(childRequired(name))
+    }
+
+    public func childContent(name: String): ?String {
+        for (child in delegate.childrenElements) {
+            if (child.name == name) {
+                return child.content
+            }
+        }
+        return None
+    }
+
+    public func childContentRequired(name: String): String {
+        return childContent(name).getOrThrow() {=> NoneValueException("Missing element with name: ${name}")}
+    }
+
+    private func childs(name: String): ArrayList<S3XmlElement> {
+        let childs = ArrayList<S3XmlElement>()
+        for (child in delegate.childrenElements) {
+            if (child.name == name) {
+                childs.append(S3XmlElement(child))
+            }
+        }
+        return childs
+    }
+
+    public func childsContents(name: String): ArrayList<String> {
+        let contents = ArrayList<String>()
+        for (child in delegate.childrenElements) {
+            if (child.name == name) {
+                contents.append(child.content)
+            }
+        }
+        return contents
+    }
+
+    public func childs<T>(name: String, action: (S3XmlElement) -> T): ArrayList<T> {
+        let result = ArrayList<T>()
+        for (child in childs(name)) {
+            result.append(action(child))
+        }
+        return result
+    }
+
+    public func attrContent(name: String): ?String {
+        for (attr in delegate.attributes) {
+            if (name == attr.name) {
+                return attr.content
+            }
+        }
+        return None
+    }
+
+    public func attrContentRequired(name: String): String {
+        return attrContent(name).getOrThrow() {=> NoneValueException("Missing attribute with name: ${name}")}
+    }
+}

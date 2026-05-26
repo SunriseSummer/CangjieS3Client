@@ -1,0 +1,13 @@
+[package]
+  vendor = "Primeton Information Technologies, Inc."
+  cjc-version = "1.0.0"
+  name = "s3client"
+  version = "0.5.0"
+  description = "Amazon S3 Client SDK implemented using Cangjie"
+  output-type = "dynamic"
+  # compile-option = "-O2"
+
+
+[target]
+    [target.x86_64-unknown-linux-gnu.bin-dependencies]
+      path-option = ["${CANGJIE_STDX_PATH}"]
