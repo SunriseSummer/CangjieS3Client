@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CDrive · 仓颉云盘</title>
+    <style>
+        :root {
+            --bg: #f0f4f8;
+            --surface: #ffffff;
+            --surface-hover: #f7f9fc;
+            --border: #e2e8f0;
+            --border-light: #edf2f7;
+            --text: #1a202c;
+            --text-secondary: #718096;
+            --text-muted: #a0aec0;
+            --primary: #4f6ef7;
+            --primary-hover: #3b5de7;
+            --primary-soft: rgba(79,110,247,0.1);
+            --success: #48bb78;
+            --success-soft: rgba(72,187,120,0.1);
+            --danger: #f56565;
+            --danger-soft: rgba(245,101,101,0.1);
+            --warning: #ed8936;
+            --warning-soft: rgba(237,137,54,0.1);
+            --sidebar-bg: #1e293b;
+            --sidebar-hover: #334155;
+            --sidebar-active: #4f6ef7;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+            --radius: 12px;
+            --radius-sm: 8px;
+            --radius-xs: 6px;
+            --transition: 0.2s ease;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+        button, input { font: inherit; }
+
+        /* ===== Sidebar ===== */
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            background: var(--sidebar-bg);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+            padding: 0;
+        }
+        .sidebar-brand {
+            padding: 28px 24px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .sidebar-brand h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar-brand .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--primary), #818cf8);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .sidebar-brand p {
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            margin-top: 6px;
+        }
+        .sidebar-nav {
+            padding: 16px 12px;
+            flex: 1;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            color: rgba(255,255,255,0.7);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .nav-item:hover { background: var(--sidebar-hover); color: #fff; }
+        .nav-item.active { background: var(--sidebar-active); color: #fff; }
+        .nav-item .nav-icon { font-size: 18px; width: 24px; text-align: center; }
+        .sidebar-stats {
+            padding: 20px 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 8px;
+        }
+        .stat-row .stat-val { color: rgba(255,255,255,0.85); font-weight: 600; }
+
+        /* ===== Main Content ===== */
+        .main {
+            margin-left: 260px;
+            flex: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 16px 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        .breadcrumb span { cursor: pointer; transition: var(--transition); }
+        .breadcrumb span:hover { color: var(--primary); }
+        .breadcrumb .sep { color: var(--text-muted); cursor: default; }
+        .breadcrumb .current { color: var(--text); font-weight: 600; }
+        .search-box {
+            position: relative;
+            width: 280px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            background: var(--bg);
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .search-box input:focus {
+            border-color: var(--primary);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px var(--primary-soft);
+        }
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+        }
+
+        /* ===== Toolbar ===== */
+        .toolbar {
+            padding: 16px 32px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .btn:hover { background: var(--surface-hover); border-color: var(--text-muted); }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+        .btn-danger {
+            color: var(--danger);
+            border-color: var(--danger);
+            background: var(--danger-soft);
+        }
+        .btn-danger:hover { background: var(--danger); color: #fff; }
+        .btn .icon { font-size: 16px; }
+
+        /* ===== File Grid ===== */
+        .content {
+            padding: 0 32px 32px;
+            flex: 1;
+        }
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+        }
+        .file-card {
+            background: var(--surface);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 20px 16px 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            position: relative;
+        }
+        .file-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .file-card.selected {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+        }
+        .file-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            line-height: 1;
+        }
+        .file-name {
+            font-size: 13px;
+            font-weight: 500;
+            word-break: break-all;
+            line-height: 1.4;
+            max-height: 2.8em;
+            overflow: hidden;
+        }
+        .file-meta {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+        .file-card .check-mark {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: var(--transition);
+            background: var(--surface);
+        }
+        .file-card.selected .check-mark {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        /* ===== File List View ===== */
+        .file-list { display: none; }
+        .file-list.active { display: block; }
+        .file-grid.hidden { display: none; }
+        .file-list table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        .file-list th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface-hover);
+        }
+        .file-list td {
+            padding: 12px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .file-list tr:hover { background: var(--surface-hover); }
+        .file-list tr.selected { background: var(--primary-soft); }
+        .file-list .name-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .file-list .name-cell .icon { font-size: 22px; }
+
+        /* ===== Modal ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            width: 440px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow: auto;
+        }
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-header h3 { font-size: 16px; font-weight: 600; }
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            font-size: 20px;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+        .modal-close:hover { background: var(--bg); color: var(--text); }
+        .modal-body { padding: 24px; }
+        .modal-body input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+        .modal-body input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-soft);
+        }
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* ===== Upload Zone ===== */
+        .upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: var(--radius);
+            padding: 40px;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: var(--primary);
+            background: var(--primary-soft);
+        }
+        .upload-zone .upload-icon { font-size: 48px; margin-bottom: 12px; }
+        .upload-zone p { color: var(--text-secondary); font-size: 14px; }
+        .upload-zone .hint { font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+
+        /* ===== Progress ===== */
+        .upload-progress {
+            display: none;
+            margin-top: 16px;
+        }
+        .upload-progress.active { display: block; }
+        .progress-bar {
+            height: 6px;
+            background: var(--bg);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        .progress-text {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* ===== Preview ===== */
+        .preview-content {
+            max-height: 60vh;
+            overflow: auto;
+            padding: 16px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: var(--radius-sm);
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        /* ===== Empty State ===== */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: var(--text-muted);
+        }
+        .empty-state .empty-icon { font-size: 64px; margin-bottom: 16px; opacity: 0.5; }
+        .empty-state h3 { font-size: 18px; color: var(--text-secondary); margin-bottom: 8px; }
+        .empty-state p { font-size: 14px; }
+
+        /* ===== Toast ===== */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            padding: 14px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 360px;
+        }
+        .toast-success { background: #f0fff4; color: #276749; border: 1px solid #c6f6d5; }
+        .toast-error { background: #fff5f5; color: #9b2c2c; border: 1px solid #fed7d7; }
+        .toast-info { background: #ebf8ff; color: #2b6cb0; border: 1px solid #bee3f8; }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* ===== Context Menu ===== */
+        .context-menu {
+            display: none;
+            position: fixed;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-lg);
+            z-index: 1500;
+            min-width: 180px;
+            padding: 6px;
+        }
+        .context-menu.active { display: block; }
+        .ctx-item {
+            padding: 10px 16px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: var(--radius-xs);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+        .ctx-item:hover { background: var(--primary-soft); color: var(--primary); }
+        .ctx-item.danger { color: var(--danger); }
+        .ctx-item.danger:hover { background: var(--danger-soft); }
+        .ctx-divider { height: 1px; background: var(--border-light); margin: 4px 8px; }
+
+        /* ===== View toggle ===== */
+        .view-toggle {
+            display: flex;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+        .view-toggle button {
+            padding: 8px 14px;
+            border: none;
+            background: var(--surface);
+            cursor: pointer;
+            font-size: 16px;
+            transition: var(--transition);
+        }
+        .view-toggle button.active { background: var(--primary); color: #fff; }
+        .view-toggle button:hover:not(.active) { background: var(--surface-hover); }
+
+        /* ===== Loading ===== */
+        .loading {
+            display: flex;
+            justify-content: center;
+            padding: 60px;
+        }
+        .spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <h1><span class="logo-icon">☁</span> CDrive</h1>
+            <p>仓颉云盘 · Cangjie Cloud Storage</p>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-item active" onclick="navigateTo('/')">
+                <span class="nav-icon">📁</span> 全部文件
+            </div>
+            <div class="nav-item" onclick="showRecentView()">
+                <span class="nav-icon">🕐</span> 最近文件
+            </div>
+            <div class="nav-item" onclick="showSourceView()">
+                <span class="nav-icon">💻</span> 项目源码
+            </div>
+        </nav>
+        <div class="sidebar-stats" id="sidebarStats">
+            <div class="stat-row"><span>文件数</span><span class="stat-val" id="statFiles">-</span></div>
+            <div class="stat-row"><span>文件夹</span><span class="stat-val" id="statDirs">-</span></div>
+            <div class="stat-row"><span>总大小</span><span class="stat-val" id="statSize">-</span></div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main">
+        <header class="header">
+            <div class="breadcrumb" id="breadcrumb"></div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="搜索文件..." oninput="handleSearch(this.value)">
+            </div>
+            <div class="view-toggle">
+                <button class="active" id="gridViewBtn" onclick="setView('grid')" title="网格视图">⊞</button>
+                <button id="listViewBtn" onclick="setView('list')" title="列表视图">☰</button>
+            </div>
+        </header>
+
+        <div class="toolbar">
+            <button class="btn btn-primary" onclick="showUploadModal()">
+                <span class="icon">⬆</span> 上传文件
+            </button>
+            <button class="btn" onclick="showMkdirModal()">
+                <span class="icon">📁</span> 新建文件夹
+            </button>
+            <button class="btn btn-danger" id="deleteBtn" style="display:none" onclick="deleteSelected()">
+                <span class="icon">🗑</span> 删除
+            </button>
+        </div>
+
+        <div class="content">
+            <div class="file-grid" id="fileGrid"></div>
+            <div class="file-list" id="fileList">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:40px"></th>
+                            <th>名称</th>
+                            <th style="width:120px">大小</th>
+                            <th style="width:100px">类型</th>
+                            <th style="width:180px">修改时间</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fileListBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Upload Modal -->
+    <div class="modal-overlay" id="uploadModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>上传文件</h3>
+                <button class="modal-close" onclick="closeModal('uploadModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()"
+                     ondragover="event.preventDefault();this.classList.add('dragover')"
+                     ondragleave="this.classList.remove('dragover')"
+                     ondrop="handleDrop(event)">
+                    <div class="upload-icon">📤</div>
+                    <p>点击选择文件或拖拽文件到此处</p>
+                    <p class="hint">支持任意类型文件</p>
+                </div>
+                <input type="file" id="fileInput" multiple style="display:none" onchange="handleFileSelect(this.files)">
+                <div class="upload-progress" id="uploadProgress">
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="progress-text" id="progressText">准备上传...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mkdir Modal -->
+    <div class="modal-overlay" id="mkdirModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>新建文件夹</h3>
+                <button class="modal-close" onclick="closeModal('mkdirModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="mkdirName" placeholder="请输入文件夹名称" onkeydown="if(event.key==='Enter')createDir()">
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal('mkdirModal')">取消</button>
+                <button class="btn btn-primary" onclick="createDir()">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Modal -->
+    <div class="modal-overlay" id="renameModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>重命名</h3>
+                <button class="modal-close" onclick="closeModal('renameModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="renameName" placeholder="新名称" onkeydown="if(event.key==='Enter')doRename()">
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal('renameModal')">取消</button>
+                <button class="btn btn-primary" onclick="doRename()">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal" style="width:700px">
+            <div class="modal-header">
+                <h3 id="previewTitle">预览</h3>
+                <button class="modal-close" onclick="closeModal('previewModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="preview-content" id="previewContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeModal('previewModal')">关闭</button>
+                <button class="btn btn-primary" id="previewDownloadBtn">下载</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="ctx-item" onclick="ctxPreview()">👁 预览</div>
+        <div class="ctx-item" onclick="ctxDownload()">⬇ 下载</div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-item" onclick="ctxRename()">✏ 重命名</div>
+        <div class="ctx-divider"></div>
+        <div class="ctx-item danger" onclick="ctxDelete()">🗑 删除</div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+    // ===== State =====
+    let currentPath = '/';
+    let currentFiles = [];
+    let selectedFiles = new Set();
+    let viewMode = 'grid';
+    let ctxFileId = null;
+    let ctxFileName = '';
+    let ctxIsDir = false;
+    let renameId = null;
+    let searchTimeout = null;
+
+    // ===== Init =====
+    document.addEventListener('DOMContentLoaded', () => {
+        navigateTo('/');
+        loadStats();
+        document.addEventListener('click', () => hideContextMenu());
+    });
+
+    // ===== Navigation =====
+    function navigateTo(path) {
+        currentPath = path;
+        selectedFiles.clear();
+        updateDeleteBtn();
+        highlightNav('all');
+        loadFiles(path);
+        updateBreadcrumb(path);
+    }
+
+    function highlightNav(which) {
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+        const items = document.querySelectorAll('.nav-item');
+        if (which === 'all' && items[0]) items[0].classList.add('active');
+        else if (which === 'recent' && items[1]) items[1].classList.add('active');
+        else if (which === 'source' && items[2]) items[2].classList.add('active');
+    }
+
+    function showRecentView() {
+        highlightNav('recent');
+        navigateTo('/');
+    }
+
+    function showSourceView() {
+        highlightNav('source');
+        navigateTo('/project-source');
+    }
+
+    // ===== API Calls =====
+    async function loadFiles(path) {
+        showLoading();
+        try {
+            const res = await fetch(`/api/files?path=${encodeURIComponent(path)}`);
+            currentFiles = await res.json();
+            renderFiles();
+        } catch (e) {
+            showToast('加载失败: ' + e.message, 'error');
+        }
+    }
+
+    async function loadStats() {
+        try {
+            const res = await fetch('/api/stats');
+            const stats = await res.json();
+            document.getElementById('statFiles').textContent = stats.totalFiles || 0;
+            document.getElementById('statDirs').textContent = stats.totalDirs || 0;
+            document.getElementById('statSize').textContent = formatSize(stats.totalSize || 0);
+        } catch (e) {}
+    }
+
+    // ===== Render =====
+    function showLoading() {
+        document.getElementById('fileGrid').innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    }
+
+    function renderFiles() {
+        renderGridView();
+        renderListView();
+    }
+
+    function renderGridView() {
+        const grid = document.getElementById('fileGrid');
+        if (currentFiles.length === 0) {
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+                <div class="empty-icon">📭</div>
+                <h3>这里还是空的</h3>
+                <p>上传文件或创建文件夹开始使用</p>
+            </div>`;
+            return;
+        }
+        grid.innerHTML = currentFiles.map(f => {
+            const isDir = f.is_directory === 'true' || f.is_directory === 't';
+            const icon = isDir ? '📁' : getFileIcon(f.name, f.content_type);
+            const size = isDir ? '' : formatSize(parseInt(f.size) || 0);
+            const sel = selectedFiles.has(f.id) ? 'selected' : '';
+            return `<div class="file-card ${sel}" 
+                        onclick="handleClick(event, '${f.id}', ${isDir}, '${escHtml(f.path)}')"
+                        ondblclick="handleDblClick('${f.id}', ${isDir}, '${escHtml(f.path)}')"
+                        oncontextmenu="showCtxMenu(event, '${f.id}', '${escHtml(f.name)}', ${isDir})">
+                <div class="check-mark">${selectedFiles.has(f.id) ? '✓' : ''}</div>
+                <div class="file-icon">${icon}</div>
+                <div class="file-name">${escHtml(f.name)}</div>
+                <div class="file-meta">${size}</div>
+            </div>`;
+        }).join('');
+    }
+
+    function renderListView() {
+        const tbody = document.getElementById('fileListBody');
+        if (currentFiles.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-muted)">暂无文件</td></tr>';
+            return;
+        }
+        tbody.innerHTML = currentFiles.map(f => {
+            const isDir = f.is_directory === 'true' || f.is_directory === 't';
+            const icon = isDir ? '📁' : getFileIcon(f.name, f.content_type);
+            const size = isDir ? '-' : formatSize(parseInt(f.size) || 0);
+            const type = isDir ? '文件夹' : getFileType(f.content_type);
+            const sel = selectedFiles.has(f.id) ? 'selected' : '';
+            const time = f.updated_at ? f.updated_at.substring(0, 19) : '';
+            return `<tr class="${sel}" 
+                        onclick="handleClick(event, '${f.id}', ${isDir}, '${escHtml(f.path)}')"
+                        ondblclick="handleDblClick('${f.id}', ${isDir}, '${escHtml(f.path)}')"
+                        oncontextmenu="showCtxMenu(event, '${f.id}', '${escHtml(f.name)}', ${isDir})">
+                <td><input type="checkbox" ${selectedFiles.has(f.id) ? 'checked' : ''} onclick="event.stopPropagation();toggleSelect('${f.id}')"></td>
+                <td><div class="name-cell"><span class="icon">${icon}</span>${escHtml(f.name)}</div></td>
+                <td>${size}</td>
+                <td>${type}</td>
+                <td>${time}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ===== Interactions =====
+    function handleClick(e, id, isDir, path) {
+        e.preventDefault();
+        if (e.ctrlKey || e.metaKey) {
+            toggleSelect(id);
+        } else {
+            selectedFiles.clear();
+            toggleSelect(id);
+        }
+        renderFiles();
+    }
+
+    function handleDblClick(id, isDir, path) {
+        if (isDir) {
+            navigateTo(path);
+        } else {
+            previewFile(id);
+        }
+    }
+
+    function toggleSelect(id) {
+        if (selectedFiles.has(id)) selectedFiles.delete(id);
+        else selectedFiles.add(id);
+        updateDeleteBtn();
+        renderFiles();
+    }
+
+    function updateDeleteBtn() {
+        document.getElementById('deleteBtn').style.display = selectedFiles.size > 0 ? '' : 'none';
+    }
+
+    // ===== Breadcrumb =====
+    function updateBreadcrumb(path) {
+        const bc = document.getElementById('breadcrumb');
+        let parts = path.split('/').filter(p => p);
+        let html = `<span onclick="navigateTo('/')">🏠 根目录</span>`;
+        let cur = '';
+        for (let i = 0; i < parts.length; i++) {
+            cur += '/' + parts[i];
+            const p = cur;
+            html += `<span class="sep">/</span>`;
+            if (i === parts.length - 1) {
+                html += `<span class="current">${escHtml(parts[i])}</span>`;
+            } else {
+                html += `<span onclick="navigateTo('${escHtml(p)}')">${escHtml(parts[i])}</span>`;
+            }
+        }
+        bc.innerHTML = html;
+    }
+
+    // ===== View Toggle =====
+    function setView(mode) {
+        viewMode = mode;
+        const grid = document.getElementById('fileGrid');
+        const list = document.getElementById('fileList');
+        document.getElementById('gridViewBtn').classList.toggle('active', mode === 'grid');
+        document.getElementById('listViewBtn').classList.toggle('active', mode === 'list');
+        if (mode === 'grid') {
+            grid.classList.remove('hidden');
+            list.classList.remove('active');
+        } else {
+            grid.classList.add('hidden');
+            list.classList.add('active');
+        }
+    }
+
+    // ===== Upload =====
+    function showUploadModal() {
+        document.getElementById('uploadModal').classList.add('active');
+        document.getElementById('uploadProgress').classList.remove('active');
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) handleFileSelect(e.dataTransfer.files);
+    }
+
+    async function handleFileSelect(files) {
+        if (!files || files.length === 0) return;
+        const progressDiv = document.getElementById('uploadProgress');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        progressDiv.classList.add('active');
+
+        let done = 0;
+        for (const file of files) {
+            progressText.textContent = `上传中: ${file.name} (${done + 1}/${files.length})`;
+            progressFill.style.width = (done / files.length * 100) + '%';
+            try {
+                const res = await fetch(`/api/upload?path=${encodeURIComponent(currentPath)}&name=${encodeURIComponent(file.name)}`, {
+                    method: 'POST',
+                    headers: { 'x-content-type': file.type || 'application/octet-stream' },
+                    body: file
+                });
+                const data = await res.json();
+                if (!data.success) showToast(`${file.name}: ${data.message}`, 'error');
+            } catch (e) {
+                showToast(`上传失败: ${file.name}`, 'error');
+            }
+            done++;
+        }
+
+        progressFill.style.width = '100%';
+        progressText.textContent = `上传完成 (${done} 个文件)`;
+        showToast(`成功上传 ${done} 个文件`, 'success');
+        setTimeout(() => {
+            closeModal('uploadModal');
+            loadFiles(currentPath);
+            loadStats();
+        }, 800);
+    }
+
+    // ===== Mkdir =====
+    function showMkdirModal() {
+        document.getElementById('mkdirModal').classList.add('active');
+        const input = document.getElementById('mkdirName');
+        input.value = '';
+        setTimeout(() => input.focus(), 100);
+    }
+
+    async function createDir() {
+        const name = document.getElementById('mkdirName').value.trim();
+        if (!name) { showToast('请输入文件夹名称', 'error'); return; }
+        try {
+            const res = await fetch('/api/mkdir', {
+                method: 'POST',
+                headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                body: `path=${encodeURIComponent(currentPath)}&name=${encodeURIComponent(name)}`
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('文件夹已创建', 'success');
+                closeModal('mkdirModal');
+                loadFiles(currentPath);
+                loadStats();
+            } else {
+                showToast(data.message, 'error');
+            }
+        } catch (e) {
+            showToast('创建失败', 'error');
+        }
+    }
+
+    // ===== Delete =====
+    async function deleteSelected() {
+        if (selectedFiles.size === 0) return;
+        if (!confirm(`确定要删除 ${selectedFiles.size} 个项目吗？`)) return;
+        for (const id of selectedFiles) {
+            try {
+                await fetch('/api/delete', {
+                    method: 'POST',
+                    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                    body: `id=${id}`
+                });
+            } catch (e) {}
+        }
+        showToast('删除成功', 'success');
+        selectedFiles.clear();
+        updateDeleteBtn();
+        loadFiles(currentPath);
+        loadStats();
+    }
+
+    // ===== Context Menu =====
+    function showCtxMenu(e, id, name, isDir) {
+        e.preventDefault();
+        e.stopPropagation();
+        ctxFileId = id;
+        ctxFileName = name;
+        ctxIsDir = isDir;
+        const menu = document.getElementById('contextMenu');
+        menu.style.left = e.clientX + 'px';
+        menu.style.top = e.clientY + 'px';
+        menu.classList.add('active');
+    }
+
+    function hideContextMenu() {
+        document.getElementById('contextMenu').classList.remove('active');
+    }
+
+    function ctxPreview() {
+        hideContextMenu();
+        if (!ctxIsDir) previewFile(ctxFileId);
+    }
+
+    function ctxDownload() {
+        hideContextMenu();
+        if (!ctxIsDir) window.open(`/api/download?id=${ctxFileId}`);
+    }
+
+    function ctxRename() {
+        hideContextMenu();
+        renameId = ctxFileId;
+        document.getElementById('renameName').value = ctxFileName;
+        document.getElementById('renameModal').classList.add('active');
+        setTimeout(() => document.getElementById('renameName').focus(), 100);
+    }
+
+    async function doRename() {
+        const newName = document.getElementById('renameName').value.trim();
+        if (!newName || !renameId) return;
+        try {
+            const res = await fetch('/api/rename', {
+                method: 'POST',
+                headers: { 'content-type': 'application/x-www-form-urlencoded' },
+                body: `id=${renameId}&name=${encodeURIComponent(newName)}`
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('重命名成功', 'success');
+                closeModal('renameModal');
+                loadFiles(currentPath);
+            } else {
+                showToast(data.message, 'error');
+            }
+        } catch (e) {
+            showToast('重命名失败', 'error');
+        }
+    }
+
+    function ctxDelete() {
+        hideContextMenu();
+        if (!confirm(`确定要删除 "${ctxFileName}" 吗？`)) return;
+        fetch('/api/delete', {
+            method: 'POST',
+            headers: { 'content-type': 'application/x-www-form-urlencoded' },
+            body: `id=${ctxFileId}`
+        }).then(r => r.json()).then(data => {
+            if (data.success) {
+                showToast('删除成功', 'success');
+                loadFiles(currentPath);
+                loadStats();
+            } else {
+                showToast(data.message, 'error');
+            }
+        }).catch(() => showToast('删除失败', 'error'));
+    }
+
+    // ===== Preview =====
+    async function previewFile(id) {
+        const file = currentFiles.find(f => f.id === String(id));
+        if (!file) return;
+        const ct = file.content_type || '';
+        const name = file.name || '';
+        document.getElementById('previewTitle').textContent = name;
+        document.getElementById('previewDownloadBtn').onclick = () => window.open(`/api/download?id=${id}`);
+
+        if (isTextType(ct) || isTextFile(name)) {
+            try {
+                const res = await fetch(`/api/preview?id=${id}`);
+                const text = await res.text();
+                document.getElementById('previewContent').textContent = text;
+                document.getElementById('previewModal').classList.add('active');
+            } catch (e) {
+                showToast('预览失败', 'error');
+            }
+        } else {
+            window.open(`/api/download?id=${id}`);
+        }
+    }
+
+    function isTextType(ct) {
+        return ct.startsWith('text/') || ct.includes('json') || ct.includes('xml') || ct.includes('javascript');
+    }
+
+    function isTextFile(name) {
+        const ext = name.split('.').pop().toLowerCase();
+        return ['cj','txt','md','json','xml','yml','yaml','toml','sh','sql','html','css','js','py','java','go','rs','ts','c','h','cpp'].includes(ext);
+    }
+
+    // ===== Search =====
+    function handleSearch(query) {
+        clearTimeout(searchTimeout);
+        if (!query.trim()) {
+            loadFiles(currentPath);
+            return;
+        }
+        searchTimeout = setTimeout(async () => {
+            try {
+                const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+                currentFiles = await res.json();
+                renderFiles();
+            } catch (e) {}
+        }, 300);
+    }
+
+    // ===== Utilities =====
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    function showToast(msg, type) {
+        const c = document.getElementById('toastContainer');
+        const t = document.createElement('div');
+        t.className = `toast toast-${type}`;
+        const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+        t.innerHTML = `${icons[type] || ''} ${escHtml(msg)}`;
+        c.appendChild(t);
+        setTimeout(() => t.remove(), 3500);
+    }
+
+    function formatSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let i = 0;
+        let size = bytes;
+        while (size >= 1024 && i < units.length - 1) { size /= 1024; i++; }
+        return size.toFixed(i > 0 ? 1 : 0) + ' ' + units[i];
+    }
+
+    function getFileIcon(name, ct) {
+        const ext = name.split('.').pop().toLowerCase();
+        const icons = {
+            'cj': '🔷', 'java': '☕', 'py': '🐍', 'js': '🟨', 'ts': '🔵',
+            'go': '🔹', 'rs': '🦀', 'c': '©', 'cpp': '©', 'h': '©',
+            'html': '🌐', 'css': '🎨', 'json': '📋', 'xml': '📄',
+            'md': '📝', 'txt': '📄', 'pdf': '📕', 'doc': '📘', 'docx': '📘',
+            'xls': '📗', 'xlsx': '📗', 'ppt': '📙', 'pptx': '📙',
+            'png': '🖼', 'jpg': '🖼', 'jpeg': '🖼', 'gif': '🖼', 'svg': '🖼',
+            'mp3': '🎵', 'mp4': '🎬', 'avi': '🎬', 'mov': '🎬',
+            'zip': '📦', 'tar': '📦', 'gz': '📦', 'rar': '📦',
+            'sh': '⚙', 'sql': '🗃', 'toml': '⚙', 'yml': '⚙', 'yaml': '⚙'
+        };
+        return icons[ext] || '📄';
+    }
+
+    function getFileType(ct) {
+        if (!ct) return '文件';
+        if (ct.startsWith('text/')) return '文本';
+        if (ct.includes('image')) return '图片';
+        if (ct.includes('video')) return '视频';
+        if (ct.includes('audio')) return '音频';
+        if (ct.includes('pdf')) return 'PDF';
+        if (ct.includes('zip') || ct.includes('tar')) return '压缩包';
+        return '文件';
+    }
+
+    function escHtml(s) {
+        if (!s) return '';
+        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+    </script>
+</body>
+</html>
