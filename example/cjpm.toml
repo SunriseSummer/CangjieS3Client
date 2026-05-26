@@ -1,0 +1,10 @@
+[package]
+  cjc-version = "1.0.0"
+  name = "s3client_example"
+  version = "0.1.0"
+  description = "Example project demonstrating CangjieS3Client usage with MinIO"
+  output-type = "executable"
+
+[target]
+  [target.x86_64-unknown-linux-gnu.bin-dependencies]
+    path-option = ["${CANGJIE_STDX_PATH}", "../s3client/target/release/s3client"]
