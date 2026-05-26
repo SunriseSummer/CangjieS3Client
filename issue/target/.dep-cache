@@ -1,0 +1,22 @@
+{
+  "bin": {},
+  "pkg-build": {
+    "/home/runner/work/CangjieS3Client/CangjieS3Client/issue/src": {
+      "package": "ice_repro",
+      "isMacro": false,
+      "accessLevel": "public",
+      "timeStamp": 1779786078,
+      "dependencies": [],
+      "std-dependencies": [
+        {
+          "std.core": []
+        }
+      ],
+      "features": [],
+      "product": true,
+      "testUsed": false,
+      "mockUsed": false
+    }
+  },
+  "pkg-test": {}
+}

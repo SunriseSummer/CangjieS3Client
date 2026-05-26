@@ -1,0 +1,14 @@
+{
+  "packageInformation": {
+    "ice_repro": {
+      "rootPackageName": "ice_repro",
+      "fileNameHash": "4189349180736627630",
+      "timeStamp": 1779786078,
+      "isBuilt": false,
+      "exeName": "main",
+      "hasSubPkgs": false
+    }
+  },
+  "jsonHash": "-5498076260569521249",
+  "rootPackageName": "ice_repro"
+}
