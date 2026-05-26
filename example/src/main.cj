@@ -92,7 +92,7 @@ func demoUploadObject(s3: S3Client): Unit {
     println("  上传文本: test/hello.txt, ETag=${putRsp1.etag}")
 
     // 2.2 上传二进制内容
-    let bytes = Array<Byte>(256, {i => UInt8(i % 256)})
+    let bytes = Array<Byte>(256, {i => UInt8(i)})
     let putReq2 = PutObjectRequest(bucket: BUCKET_NAME, key: "test/binary.dat")
     let putRsp2 = s3.putObject(putReq2, S3Content.fromBytes(bytes))
     println("  上传二进制: test/binary.dat, ETag=${putRsp2.etag}")

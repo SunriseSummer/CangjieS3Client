@@ -91,7 +91,7 @@ cjpm run
 
 如果需要自定义 MinIO 连接信息，请修改 `src/main.cj` 中的以下常量：
 
-```
+```cangjie
 let ENDPOINT    = "http://127.0.0.1:9000"  // S3 服务地址
 let ACCESS_KEY  = "minioadmin"              // Access Key
 let SECRET_KEY  = "minioadmin"              // Secret Key
