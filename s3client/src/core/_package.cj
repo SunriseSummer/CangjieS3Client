@@ -68,7 +68,7 @@ internal import stdx.net.http.HttpHeaders
 internal import stdx.net.http.Protocol
 internal import stdx.net.http.HttpStatusCode
 internal import stdx.net.tls.TlsClientConfig
-internal import stdx.net.tls.CertificateVerifyMode
+internal import stdx.net.tls.common.CertificateVerifyMode
 internal import stdx.log.Logger
 internal import stdx.log.LogLevel
 internal import stdx.log.Attr
